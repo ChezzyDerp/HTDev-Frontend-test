@@ -1,10 +1,13 @@
+import { EntryFieldsReducer, EntryState } from './entryfieldsReducer';
 import { combineReducers } from "redux";
 import {noteReducer, NoteState} from './notesReducer'
 
 export interface AppState{
-    notes: NoteState
+    notes: NoteState,
+    entryfields: EntryState
 }
 
 export const rootReducer = combineReducers<AppState>({
-    notes: noteReducer
+    notes: noteReducer,
+    entryfields: EntryFieldsReducer
   });

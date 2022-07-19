@@ -8,6 +8,7 @@ import { TextareaAutosize } from '@mui/material';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useNavigate } from "react-router-dom";
 import CreateRecords from './components/CreateRecords';
+import Records from './components/Records';
 
 
 
@@ -38,7 +39,7 @@ const App = () => {
       
       <Routes>
         <Route path='/create_record' element={<CreateRecords/>}/>
-        <Route path='/records' element={<div>records</div>}/>
+        <Route path='/records' element={<Records/>}/>
         <Route path='/' element={<Navigate to='/create_record'/>}/>
       </Routes>
 

@@ -13,7 +13,7 @@ export const noteReducer: (s: NoteState | undefined, a: NoteActionT) => NoteStat
   ) => {
     switch (a.type) {
       case ADD_NOTE:
-        return { notes: [...s.notes, a.payload] };
+        return {...s, notes:  [...s.notes, a.payload] };
       default:
         return s;
     }

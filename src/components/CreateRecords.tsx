@@ -1,23 +1,26 @@
-import { Button, Grid, MenuItem, TextField } from '@mui/material'
+import { Alert, Button, Grid, MenuItem, Snackbar, Stack, TextField } from '@mui/material'
 import { Box } from '@mui/system'
-import React, { useEffect, useState } from 'react'
+import React, { FC, useEffect, useState } from 'react'
 import SendIcon from '@mui/icons-material/Send';
 import { useDispatch, useSelector } from 'react-redux';
 import { AddNote } from '../store/actions/AddNote';
 import { NoteT } from '../types';
 import { getRecordDate, getTimeZones } from '../api';
-import { EntryState } from '../store/reducers/entryfieldsReducer';
 import { SIGN, TEXT, TZ } from '../store/actionTypes';
+import { AppState } from '../store/reducers';
+import useLocalStorage from "use-local-storage";
 
+const CreateRecords: FC = () => {
 
+    const [notes, setNotes] = useLocalStorage<NoteT[]>("notes", []);
+    const [buttonIs, setButtonIs] = useState(false)
 
+    const [snackSuccess, setSnackSuccess] = useState(false)
+    const [snackError, setSnackError] = useState(false)
 
-
-const CreateRecords = () => {
-
-    const text = useSelector((state: EntryState ) => state.text)
-    const sign = useSelector((state: EntryState ) => state.sign)
-    const tz = useSelector((state: EntryState ) => state.tz)
+    const text:string = useSelector((state: AppState ) => state.entryfields.text)
+    const sign:string = useSelector((state: AppState ) => localStorage.getItem('sign') ||  state.entryfields.sign) 
+    const tz  :string = useSelector((state: AppState ) => localStorage.getItem('tz')   || state.entryfields.tz)   
 
     const dispatch = useDispatch()
 
@@ -27,12 +30,35 @@ const CreateRecords = () => {
     }])
 
     const sendNote = () =>{
-        getRecordDate(tz).then((data) =>{
-           let record = data.data
-           let note: NoteT = {text, sign, tz, date: record}
-           dispatch(AddNote(note))
-        })
+        setButtonIs(true)
+
+        if(tz && text && sign){
+
+           if(sign.length <= 100){
+
+            getRecordDate(tz).then((data) =>{
+                let record = data.data
+                let note: NoteT = {text, sign, tz, date: record}
+    
+                localStorage.setItem("sign", sign)
+                localStorage.setItem("tz", tz)
+                
+                dispatch(AddNote(note))
+    
+    
+                setNotes([...notes, note])
+                setButtonIs(false)
+
+                setSnackSuccess(true)
+                
+                return 0
+            })
+           }
+        }
+        setButtonIs(false)
+        setSnackError(true)
     }
+
     const handleValue = (payload, type) =>{
         dispatch({payload, type})
     }
@@ -52,6 +78,22 @@ const CreateRecords = () => {
     return (
         
         <Box sx={{ display:'flex', flexDirection:'column', alignItems:'flex-end'}}>
+
+            {/* Snack bars */}
+            <Stack spacing={2} sx={{ width: '100%' }}>
+                <Snackbar open={snackError} autoHideDuration={6000} onClose={() => setSnackError(false)}>
+                    <Alert onClose={() => setSnackError(false)} severity="error" sx={{ width: '100%' }}>
+                       Не все поля заполненны!
+                    </Alert>
+                </Snackbar>
+                <Snackbar open={snackSuccess} autoHideDuration={6000} onClose={() => setSnackSuccess(false)}>
+                    <Alert onClose={() => setSnackSuccess(false)} severity="success" sx={{ width: '100%' }}>
+                        Успешное добавление
+                    </Alert>
+                </Snackbar>
+            </Stack>
+
+            {/* Layout */}
             <Grid container sx={{margin:"10px 0"}}>
 
                 <Grid item xs>
@@ -99,7 +141,7 @@ const CreateRecords = () => {
 
             </Grid>
 
-            <Button variant="contained" onClick={sendNote} sx={{marginTop:'10px'}} endIcon={<SendIcon />}>
+            <Button variant="contained" disabled={buttonIs} onClick={sendNote} sx={{marginTop:'10px'}} endIcon={<SendIcon />}>
                 Отправить
             </Button>
 
