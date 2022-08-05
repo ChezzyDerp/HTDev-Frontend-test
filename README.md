@@ -8,7 +8,7 @@ If in short it was necessary to write a small application in
 - Redax
 - Typescript
 - Webpack
-- 
+- SCSS
 ##### Also was need to save all date in localstorage
 ###### Without use  _create-react-app_.
 
